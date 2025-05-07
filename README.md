@@ -1,3 +1,65 @@
 # config-drift-detector
 
 Compare desired and observed configuration values without modifying hosts.
+
+## Run
+
+Python 3.8 or later; no third-party packages or cloud credentials are required.
+
+```sh
+python3 tool.py examples/input.json
+cat examples/input.json | python3 tool.py -
+python3 -m unittest -v
+```
+
+## Example
+
+Input:
+
+```json
+{
+  "desired": {
+    "port": 8080,
+    "mode": "safe"
+  },
+  "actual": {
+    "port": 9090
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "missing": [
+    "mode"
+  ],
+  "extra": [],
+  "changed": [
+    {
+      "key": "port",
+      "expected": 8080,
+      "actual": 9090
+    }
+  ],
+  "in_sync": false
+}
+```
+
+The command writes JSON to standard output. Exit 0 means evaluation completed;
+a finding in the output may still require attention. Invalid input returns exit 2,
+with an error on standard error and no result on standard output.
+
+## Operational scope
+
+Compares top-level keys; values may contain secrets, so review input and output handling.
+
+The tool evaluates supplied data locally. It does not change hosts, deploy
+resources, or establish production compliance. Example identifiers and observations
+are test fixtures. Keep credentials and private inventory out of Git.
+
+## Design and verification
+
+See [NOTES.md](NOTES.md) for the input contract, verification, and integration notes.
+Related utilities: [least-privilege-file-auditor](https://github.com/sal-s-root/least-privilege-file-auditor), [secret-redaction-filter](https://github.com/sal-s-root/secret-redaction-filter).
